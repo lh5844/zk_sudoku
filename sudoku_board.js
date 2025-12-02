@@ -61,5 +61,29 @@ function displayBoard(board, containerID, prefilledCells){
     container.innerHTML = html;
 }
 
-displayBoard(initialBoard, "initialBoardDiv", prefilledCells)
-displayBoard(solutionBoard, 'solutionBoardDiv', prefilledCells)
+// Fisher-Yates array shuffling algorithm for random permutation
+function shuffleArray(array){
+    for (let i = array.length -1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i+1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// mapping the random permutation onto solution board 
+function permutateBoard(board, permutation){
+    const mapping = {};
+    for (let i = 0; i < 9; i++){
+        mapping[i+1] = permutation[i];
+    }
+
+    return board.map(row => row.map(cell => mapping[cell]));
+}
+
+displayBoard(initialBoard, "initialBoardDiv", prefilledCells);
+// displayBoard(solutionBoard, 'solutionBoardDiv', prefilledCells);
+
+const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const permutation = shuffleArray([...digits]);
+const permutatedSolution = permutateBoard(solutionBoard, permutation);
+displayBoard(permutatedSolution, "permSolutionBoardDiv", prefilledCells);
