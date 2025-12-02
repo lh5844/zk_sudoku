@@ -47,32 +47,45 @@
     td.bottom { border-bottom: 3px solid black; }
 
     .prefilled {background-color: lightblue;}
+
+    .buttons { margin-top: 20px; }
+    permuteButton:disabled{
+        background-color: lightgray;
+        cursor: not-allowed;
+        opacity: 0.8; 
+    }
 </style>
 </head>
 <body>
-<h1>Zero Knowledge Sudoku</h1>
+<h1>Zero Knowledge Sudoku Protocol</h1>
 
 <h2>Inital Board that Both Prover & Verifier Sees</h2>
 <div id="initialBoardDiv"></div>
 
 <div class="grid-container">
+    
     <div class="views">
         <h2>Prover Side</h2>
         <h3>What the Prover Sees</h3>
         <h4 id="proverBoardTitle">Solution Board</h4>
         <div id="solutionBoardDiv">
         </div>
-        <div style="margin-top:20px">
+        <div>
             <span>Step 1:</span>
-            <button id="permuteButton">Permutate Solution</button>
+            <button class="buttons" id="permuteButton">Permutate Solution</button>
+        </div>
+        <div>
+            <button class="buttons" onclick="location.reload()">Reset Protocol</button>
         </div>
     </div>
+
     <div class="views">
         <h2>Verifier Side</h2>
         <h3>What the Verifier Sees</h3>
         <h4>Initial</h4>
         <div id="verifierBoardDiv"></div>
     </div>
+
 </div>
 
 

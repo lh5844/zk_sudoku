@@ -86,14 +86,17 @@ displayBoard(solutionBoard, 'solutionBoardDiv', prefilledCells);
 // initally empty board for verifier 
 const emptyBoard = initialBoard.map(row=> row.map(_ => 0));
 displayBoard(emptyBoard, "verifierBoardDiv", null);
-document.getElementById("permuteButton").addEventListener("click", ()=>{
+
+const permuteButton = document.getElementById("permuteButton");
+permuteButton.addEventListener("click", ()=>{
     const digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
     const permutation = shuffleArray([...digits]);
     const permutatedSolution = permutateBoard(solutionBoard, permutation);
     
     displayBoard(permutatedSolution, "solutionBoardDiv", prefilledCells);
-    
     document.getElementById("proverBoardTitle").textContent = "Permutated Board";
+
+    permuteButton.disabled = true;
 });
 
 
