@@ -1,0 +1,49 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sudoku ZK</title>
+<style>
+    /* board side by side */
+    .grid-container {
+        display: flex;
+        justify-content: center;
+        gap: 50px; 
+        margin-top: 20px;
+    }
+    table { border-collapse: collapse }
+    td {
+        width: 40px; 
+        height: 40px; 
+        text-align: center; 
+        font-weight: bold;
+        font-size: 18px;
+        border: 1px solid black; /* lines for cells */
+    }
+
+    /* bolder borders for 3x3*/
+    td.top { border-top: 3px solid black; }
+    td.left { border-left: 3px solid black; }
+    td.right { border-right: 3px solid black; }
+    td.bottom { border-bottom: 3px solid black; }
+
+    .prefilled {background-color: lightblue;}
+</style>
+</head>
+<body>
+<h1>Zero Knowledge Sudoku</h1>
+
+<div class="grid-container">
+    <div>
+        <h2>Initial Puzzle</h2>
+        <div id="initialBoardDiv"></div>
+    </div>
+    <div>
+        <h2>Solution</h2>
+        <div id="solutionBoardDiv"></div>
+    </div>
+</div>
+
+
+<script src="sudoku_board.js"></script>
+</body>
+</html>
