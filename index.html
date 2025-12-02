@@ -3,13 +3,33 @@
 <meta charset="UTF-8">
 <title>Sudoku ZK</title>
 <style>
+    h1 { text-align: center; }
+    h2, h3, h4 { 
+        text-align: center;
+        margin: 5px 0; 
+    }
+
+    #initialBoardDiv {
+        display: flex;
+        justify-content: center; /* center the initial board */
+        margin-bottom: 30px;
+        margin-top: 20px;
+    }
+
     /* board side by side */
     .grid-container {
         display: flex;
         justify-content: center;
-        gap: 50px; 
+        gap: 100px; 
         margin-top: 20px;
     }
+    
+    .views {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
     table { border-collapse: collapse }
     td {
         width: 40px; 
@@ -32,14 +52,26 @@
 <body>
 <h1>Zero Knowledge Sudoku</h1>
 
+<h2>Inital Board that Both Prover & Verifier Sees</h2>
+<div id="initialBoardDiv"></div>
+
 <div class="grid-container">
-    <div>
-        <h2>Initial Puzzle</h2>
-        <div id="initialBoardDiv"></div>
+    <div class="views">
+        <h2>Prover Side</h2>
+        <h3>What the Prover Sees</h3>
+        <h4 id="proverBoardTitle">Solution Board</h4>
+        <div id="solutionBoardDiv">
+        </div>
+        <div style="margin-top:20px">
+            <span>Step 1:</span>
+            <button id="permuteButton">Permutate Solution</button>
+        </div>
     </div>
-    <div>
-        <h2>Solution</h2>
-        <div id="permSolutionBoardDiv"></div>
+    <div class="views">
+        <h2>Verifier Side</h2>
+        <h3>What the Verifier Sees</h3>
+        <h4>Initial</h4>
+        <div id="verifierBoardDiv"></div>
     </div>
 </div>
 
