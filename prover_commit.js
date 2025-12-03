@@ -32,7 +32,7 @@ permuteButton.addEventListener("click", ()=>{
     document.getElementById("proverBoardTitle").textContent = "Permutated Board";
 
     permuteButton.disabled = true;
-    commitButton.disabled = false; // can't commit until board is permutated
+    commitButton.disabled = false; // can commit after board is permutated
 });
 
 // commitment helpers 
@@ -67,14 +67,21 @@ async function commitBoard(board){
             });
         }
     }
-    displayCommitments();
+    displayCommitments(committedCells, "commitedBoardDiv");
 }
 
-function displayCommitments(){
-    const box = document.getElementById("commitmentBox");
-    box.innerHTML = committedCells.map(c =>
-        `(${c.row},${c.col}) → ${c.hash}`
-    ).join("<br>");
+function formatHashToBoard(committedCells){
+    const board = Array.from({length: 9}, () => Array(9).fill(""));;
+    
+    for (const cell of committedCells){
+        board[cell.row][cell.col] = cell.hash;
+    }
+    return board
+}
+
+function displayCommitments(committedCells, containerID){
+    const commitedBoard = formatHashToBoard(committedCells)
+    displayBoard(commitedBoard, containerID, prefilledCells);
 }
 
 const commitButton = document.getElementById("commitButton");
