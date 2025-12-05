@@ -42,6 +42,67 @@ function generateRandomSalt(len=16){
     return [...bytes].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 
+// commitment helpers 
+// L = 4k + 2n + 4
+// k security parameter, n is message length (1 sudoku cell)
+// L = 4*256 + 2*4 + 4  = 1036 
+// do L as small value for now
+function generateRandomBits(L){
+    let result = '';
+    for (let i = 0; i < L; i++){
+        result += Math.random() < 0.5 ? '0':'1';
+    }
+    return result; 
+}
+
+// random matrix A (k x L)
+function randomMatrix(k, L){
+    const A = [];
+    for(let i = 0; i < k; i++){
+        const row = [];
+        for(let j = 0; j < L; j++){
+            // random small integers from  0-9
+            row.push(Math.floor(Math.random()*10))
+        }
+        A.push(row);
+    }
+
+    return A;
+}
+
+// multiple matrix A (k x L) by vector r (L)
+function multiplyMatrixByVector(A, r){
+    const result = [];
+    for (let i = 0; i < A.length; i++){
+        let sum = 0;
+        for (let j = 0; j < r.length; j++) {
+            sum += A[i][j] * r.charCodeAt(j);
+        }
+        result.push(sum % 256);
+    }
+    return result;
+}
+
+// compute b = s - A*r (mod 256) 
+function computeB(s, Ar){
+    const b = [];
+    for (let i = 0; i < s.length; i++){
+        b.push((s[i] - Ar[i] + 256) % 256);
+    }
+
+    return b;
+}
+
+// universal hash function: h(r) = A*r + b
+function universalHashFunc(A, r, b){
+    const Ar = multiplyMatrixByVector(A, r);
+    const h = [];
+    for (let i = 0; i < Ar.length; i++) {
+        h.push((Ar[i] + b[i]) % 256);
+    }
+    return h;
+}
+
 async function sha256Hash(message){
     const buffer = new TextEncoder().encode(message);
     const hash = await crypto.subtle.digest("SHA-256", buffer);
@@ -51,19 +112,45 @@ async function sha256Hash(message){
 // commitment every cell of permutated solution board
 async function commitBoard(board){
     committedCells = [];
+
+    // small values for demo purposes
+    const k  = 4; // security param
+    const L = 16; // length of r per cell
+
     for (let row = 0; row < 9; row++){
         for (let col = 0; col < 9; col++){
             const cell = board[row][col];
-            const salt = generateRandomSalt();
-            const msg = cell + "|" + salt;
-            const hash = await sha256Hash(msg);
 
+            // k bit string s = MD(message)
+            const sFull = await sha256Hash(cell.toString());
+            const s = [];
+            for (let i = 0; i < k; i++) {
+                // get first k bytes
+                s.push(parseInt(sFull.slice(i*2, i*2+2), 16)); 
+            }
+
+            // pick random r 
+            const r = generateRandomBits(L);
+            // pick random matrix A
+            const A = randomMatrix(k, L);
+            // compute b so that h(r) = s
+            const Ar = multiplyMatrixByVector(A, r);
+            const b = computeB(s, Ar);
+
+            // y = hash(r) to hide so receiver cant figure out r or msg from commitment alone
+            const y = await sha256Hash(r);
+
+            // commitment string is (universal hash function, y)
+            // universal hash function reconstructed from A, b, r
+            // decommitment string = r 
             committedCells.push({
-                row: row,
-                col: col, 
-                hash, 
-                salt,
-                cell: cell
+                row,
+                col,
+                A, 
+                b,
+                y, 
+                r,
+                cell
             });
         }
     }
@@ -74,7 +161,7 @@ function formatHashToBoard(committedCells){
     const board = Array.from({length: 9}, () => Array(9).fill(""));;
     
     for (const cell of committedCells){
-        board[cell.row][cell.col] = cell.hash;
+        board[cell.row][cell.col] = cell.y;
     }
     return board
 }
