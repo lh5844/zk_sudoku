@@ -95,12 +95,16 @@ function computeB(s, Ar){
 
 // universal hash function: h(r) = A*r + b
 function universalHashFunc(A, r, b){
-    const Ar = multiplyMatrixByVector(A, r);
-    const h = [];
-    for (let i = 0; i < Ar.length; i++) {
-        h.push((Ar[i] + b[i]) % 256);
+    const k = b.length;
+    const h_r = [];
+    for (let i = 0; i < k; i++) {
+        let sum = 0;
+        for (let j = 0; j < r.length; j++) {
+            sum += A[i][j] * r.charCodeAt(j);
+        }
+        h_r.push((sum + b[i]) % 256);
     }
-    return h;
+    return h_r;
 }
 
 async function sha256Hash(message){
@@ -154,7 +158,7 @@ async function commitBoard(board){
             });
         }
     }
-    displayCommitments(committedCells, "commitedBoardDiv");
+    return committedCells;
 }
 
 function formatHashToBoard(committedCells){
@@ -173,6 +177,68 @@ function displayCommitments(committedCells, containerID){
 
 const commitButton = document.getElementById("commitButton");
 commitButton.onclick = async () => {
-  await commitBoard(permutatedSolution);
-  commitButton.disabled = true;
+    committedCells = await commitBoard(permutatedSolution);
+    displayCommitments(committedCells, "commitedBoardDiv");
+    commitButton.disabled = true;
+    openButton.disabled = false; // can only open after committed
 };
+
+const openButton = document.getElementById("openButton");
+openButton.onclick = async () =>{
+    const revealedR = committedCells.map(c=>c.r)
+    const openedBoard = await openBoardCommitmentValues(committedCells, permutatedSolution, revealedR);
+    displayBoard(openedBoard, "openBoardDiv", prefilledCells)
+    openButton.disabled = true;
+}
+
+async function verifyCellCommitment(cellCommitment, revealedCell, r){
+    const {A, b, y} = cellCommitment; 
+
+    //check y = MD(r) to confirm r was used
+    const check_y = await sha256Hash(r);
+    if (check_y !== y){
+        // return false; 
+        return null; 
+    }
+
+    // check h(r) = MD(m) = s
+    // confirm universal hash func maps r to correct s
+    const sFull = await sha256Hash(revealedCell.toString());
+
+    const k = b.length; 
+    const s = []; 
+    for (let i = 0; i < k; i++) {
+        s.push(parseInt(sFull.slice(i*2, i*2+2), 16)); 
+    }
+
+    // reconstruct h(r) = A*r + b
+    const h_r = universalHashFunc(A, r, b);
+    // check h(r) = s which would mean s = MD(m) and actually hashed real msg
+    for (let i = 0; i < k; i++){
+        if(h_r[i] !== s[i]){
+            // return false;
+            return null; 
+        } 
+    }
+
+    //return true; 
+    return revealedCell;
+}
+
+async function  openBoardCommitmentValues(committedCells, revealedBoard, revealedR){
+    const openedBoard = Array.from({ length: 9 }, () => Array(9).fill(null));
+
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            const idx = row * 9 + col;
+            const cellCommitment = committedCells[idx];
+            const revealedValue = revealedBoard[row][col];
+            const r = revealedR[idx];
+
+            const value = await verifyCellCommitment(cellCommitment, revealedValue, r);
+            openedBoard[row][col] = value; // null if verification fails
+        }
+    }
+
+    return openedBoard;
+}
