@@ -31,10 +31,10 @@ export const prefilledCells = initialBoard.map(row => row.map(val => val !== 0))
 export function displayBoard(board, containerID, prefilledCells){
     const container = document.getElementById(containerID)
     let html = '<table>';
-    for (let i = 0; i < 9; i++) {
+    for (let row = 0; row < 9; row++) {
         html += '<tr>';
-        for (let j = 0; j < 9; j++) {
-            let val = board[i][j];
+        for (let col = 0; col < 9; col++) {
+            let val = board[row][col];
             
             if (val == 0){ // zero values should be blank
                 val = '';
@@ -48,10 +48,10 @@ export function displayBoard(board, containerID, prefilledCells){
             
             // bolder lines for the overall 3x3
             let borderClass = '';
-            if (i % 3 === 0) borderClass += ' top';
-            if (i === 8) borderClass += ' bottom';
-            if (j % 3 === 0) borderClass += ' left';
-            if (j === 8) borderClass += ' right';
+            if (row % 3 === 0) borderClass += ' top';
+            if (row === 8) borderClass += ' bottom';
+            if (col % 3 === 0) borderClass += ' left';
+            if (col === 8) borderClass += ' right';
 
             html += `<td class="${cellClass}${borderClass}">${val}</td>`;
         }

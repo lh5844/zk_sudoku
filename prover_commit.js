@@ -36,17 +36,10 @@ permuteButton.addEventListener("click", ()=>{
 });
 
 // commitment helpers 
-function generateRandomSalt(len=16){
-    const bytes = crypto.getRandomValues(new Uint8Array(len));
-    // format into hex 
-    return [...bytes].map(b => b.toString(16).padStart(2, "0")).join("");
-}
-
-// commitment helpers 
 // L = 4k + 2n + 4
 // k security parameter, n is message length (1 sudoku cell)
 // L = 4*256 + 2*4 + 4  = 1036 
-// do L as small value for now
+// do k and L as small values or else code would break (overflow/precision)
 function generateRandomBits(L){
     let result = '';
     for (let i = 0; i < L; i++){
@@ -61,7 +54,7 @@ function randomMatrix(k, L){
     for(let i = 0; i < k; i++){
         const row = [];
         for(let j = 0; j < L; j++){
-            // random small integers from  0-9
+            // random small integers from  0-9 for demo purposes
             row.push(Math.floor(Math.random()*10))
         }
         A.push(row);
@@ -113,7 +106,7 @@ async function sha256Hash(message){
     return [...new Uint8Array(hash)].map(x => x.toString(16).padStart(2,"0")).join("");
 }
 
-// commitment every cell of permutated solution board
+// commitment of every cell of permutated solution board
 async function commitBoard(board){
     committedCells = [];
 
@@ -197,7 +190,6 @@ async function verifyCellCommitment(cellCommitment, revealedCell, r){
     //check y = MD(r) to confirm r was used
     const check_y = await sha256Hash(r);
     if (check_y !== y){
-        // return false; 
         return null; 
     }
 
@@ -216,12 +208,10 @@ async function verifyCellCommitment(cellCommitment, revealedCell, r){
     // check h(r) = s which would mean s = MD(m) and actually hashed real msg
     for (let i = 0; i < k; i++){
         if(h_r[i] !== s[i]){
-            // return false;
             return null; 
         } 
     }
 
-    //return true; 
     return revealedCell;
 }
 
@@ -230,10 +220,10 @@ async function  openBoardCommitmentValues(committedCells, revealedBoard, reveale
 
     for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
-            const idx = row * 9 + col;
-            const cellCommitment = committedCells[idx];
+            const cell = row * 9 + col;
+            const cellCommitment = committedCells[cell];
             const revealedValue = revealedBoard[row][col];
-            const r = revealedR[idx];
+            const r = revealedR[cell];
 
             const value = await verifyCellCommitment(cellCommitment, revealedValue, r);
             openedBoard[row][col] = value; // null if verification fails
