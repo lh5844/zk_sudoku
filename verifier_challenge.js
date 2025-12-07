@@ -1,5 +1,14 @@
-import { solutionBoard, prefilledCells, displayBoard } from "./sudoku_display.js";
+import { emptyBoard, solutionBoard, prefilledCells, displayBoard } from "./sudoku_display.js";
 import { committedCells, openBoardCommitmentValues, permutatedSolution, revealedR } from "./prover_commit.js";
+
+let round = 0; 
+function updateRound(){
+    document.getElementById("roundNumber").textContent = round; 
+    const n = 3; // 9x9 sudoku with 3x3 small subtables 
+    const totalChallenges = 3*n*n + 1; // row, col, subtable + perm
+    const soundnessError = Math.pow(1 - 1/totalChallenges, round);
+    document.getElementById("soundnessError").textContent = soundnessError.toFixed(6); 
+}
 
 document.addEventListener("boardCommitted", () => {
     const chooseButton = document.getElementById("chooseChallenge");
@@ -11,7 +20,21 @@ document.getElementById("chooseChallenge").onclick = async() =>{
     // maybe dont present this as an option if permutation choice
     const index = parseInt(document.getElementById("challengeIndex").value);
 
-    await handleVerifierChallenge(type, index);
+    let openedBoard = await handleVerifierChallenge(type, index);
+    displayBoard(openedBoard, "verifierBoardDiv", prefilledCells);
+
+    // can't choose another challenge until a new round
+    document.getElementById("chooseChallenge").disabled = true;
+    document.getElementById("verifyChallenge").disabled = false; 
+}
+
+document.getElementById("verifyChallenge").onclick = () =>{
+    // need to actually verify the board 
+    round += 1; 
+    updateRound(); 
+
+    document.getElementById("verifyChallenge").disabled = true;
+    document.getElementById("nextRound").disabled = false;
 }
 
 async function handleVerifierChallenge(type, index){
@@ -27,11 +50,12 @@ async function handleVerifierChallenge(type, index){
     }
     
     const verifyCells = selected_cells.map(c => [c.row, c.col]); 
-    
+
     let openedBoard = await openBoardCommitmentValues(
         committedCells, permutatedSolution, revealedR, verifyCells
     )
-    displayBoard(openedBoard, "verifierBoardDiv", prefilledCells);
+
+    return openedBoard;
 }
 
 function getRow(r) {
@@ -54,6 +78,32 @@ function getSubtable(b) {
 
 function getPermutation(){
     return committedCells.filter(c => prefilledCells[c.row][c.col]);
+}
+
+function clearBoards(){ 
+    const openBoardDiv = document.getElementById("openBoardDiv");
+    const commitedBoardDiv = document.getElementById("commitedBoardDiv");
+
+    if (openBoardDiv) openBoardDiv.innerHTML = "";
+    if (commitedBoardDiv) commitedBoardDiv.innerHTML = "";
+}
+
+function startNewRound(){
+    // go through protocol again from permutation 
+    const permuteButton = document.getElementById("permuteButton");
+    permuteButton.disabled = false; 
+
+    clearBoards(); 
+
+    // reset verifier board 
+    displayBoard(emptyBoard, "verifierBoardDiv", null);
+    displayBoard(solutionBoard, "solutionBoardDiv", prefilledCells);
+
+}
+
+const nextRoundButton = document.getElementById("nextRound");
+nextRoundButton.onclick = () => {
+    startNewRound();
 }
 
 

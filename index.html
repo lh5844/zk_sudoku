@@ -73,6 +73,10 @@
 
 <h2>Inital Board that Both Prover & Verifier Sees</h2>
 <div id="initialBoardDiv"></div>
+<div>
+    <span>Round: <span id="roundNumber">0</span></span>
+    <span>Soundness error: <span id="soundnessError">1.000</span></span>
+</div>
 
 <div class="grid-container">
     
@@ -120,6 +124,8 @@
             <option value="8">9</option>
         </select>
         <button class="buttons" button id="chooseChallenge" disabled>Choose Challenge</button>
+        <button class="buttons" button id="verifyChallenge" disabled>Verify</button>
+        <button class="buttons" button id="nextRound" disabled>Next Round</button>
         
     </div>
 

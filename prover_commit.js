@@ -171,6 +171,8 @@ function displayCommitments(committedCells, containerID){
 const commitButton = document.getElementById("commitButton");
 commitButton.onclick = async () => {
     committedCells = await commitBoard(permutatedSolution);
+    // decommit string for opening later 
+    revealedR = committedCells.map(c=>c.r)
     displayCommitments(committedCells, "commitedBoardDiv");
     document.dispatchEvent(new CustomEvent("boardCommitted"));
     commitButton.disabled = true;
@@ -179,8 +181,6 @@ commitButton.onclick = async () => {
 
 const openButton = document.getElementById("openButton");
 openButton.onclick = async () =>{
-    revealedR = committedCells.map(c=>c.r)
-
     // generate list of all cells to open (row, col pairs)
     const entireBoardCells = Array.from({ length: 9 }, (_, row) =>
         Array.from({ length: 9 }, (_, col) => [row, col])

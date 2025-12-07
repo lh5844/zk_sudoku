@@ -65,5 +65,5 @@ displayBoard(initialBoard, "initialBoardDiv", prefilledCells);
 displayBoard(solutionBoard, 'solutionBoardDiv', prefilledCells);
 
 // initally empty board for verifier 
-const emptyBoard = initialBoard.map(row=> row.map(_ => 0));
+export const emptyBoard = initialBoard.map(row=> row.map(_ => 0));
 displayBoard(emptyBoard, "verifierBoardDiv", null);
