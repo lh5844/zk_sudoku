@@ -1,7 +1,8 @@
 import { solutionBoard, prefilledCells, displayBoard } from "./sudoku_display.js";
 
-let permutatedSolution = null;
+export let permutatedSolution = null;
 export let committedCells = [];
+export let revealedR = [];
 // Fisher-Yates array shuffling algorithm for random permutation
 function shuffleArray(array){
     for (let i = array.length -1; i > 0; i--){
@@ -178,8 +179,14 @@ commitButton.onclick = async () => {
 
 const openButton = document.getElementById("openButton");
 openButton.onclick = async () =>{
-    const revealedR = committedCells.map(c=>c.r)
-    const openedBoard = await openBoardCommitmentValues(committedCells, permutatedSolution, revealedR);
+    revealedR = committedCells.map(c=>c.r)
+
+    // generate list of all cells to open (row, col pairs)
+    const entireBoardCells = Array.from({ length: 9 }, (_, row) =>
+        Array.from({ length: 9 }, (_, col) => [row, col])
+    ).flat();
+
+    const openedBoard = await openBoardCommitmentValues(committedCells, permutatedSolution, revealedR, entireBoardCells);
     displayBoard(openedBoard, "openBoardDiv", prefilledCells)
     openButton.disabled = true;
 }
@@ -215,19 +222,18 @@ async function verifyCellCommitment(cellCommitment, revealedCell, r){
     return revealedCell;
 }
 
-async function  openBoardCommitmentValues(committedCells, revealedBoard, revealedR){
-    const openedBoard = Array.from({ length: 9 }, () => Array(9).fill(null));
+export async function  openBoardCommitmentValues(committedCells, revealedBoard, revealedR, verifyCells){
+    let openedBoard = Array.from({ length: 9 }, () => Array(9).fill(0));
 
-    for (let row = 0; row < 9; row++) {
-        for (let col = 0; col < 9; col++) {
-            const cell = row * 9 + col;
-            const cellCommitment = committedCells[cell];
-            const revealedValue = revealedBoard[row][col];
-            const r = revealedR[cell];
+    for (const[row, col] of verifyCells) {
+        const cell = row * 9 + col;
+        const cellCommitment = committedCells[cell];
+        const revealedValue = revealedBoard[row][col];
+        const r = revealedR[cell];
 
-            const value = await verifyCellCommitment(cellCommitment, revealedValue, r);
-            openedBoard[row][col] = value; // null if verification fails
-        }
+        const value = await verifyCellCommitment(cellCommitment, revealedValue, r);
+        openedBoard[row][col] = value; // null if verification fails
+    
     }
 
     return openedBoard;
