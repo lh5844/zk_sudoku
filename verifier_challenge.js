@@ -168,6 +168,7 @@ function startNewRound(){
 const nextRoundButton = document.getElementById("nextRound");
 nextRoundButton.onclick = () => {
     startNewRound();
+    document.getElementById("nextRound").disabled = true;
 }
 
 
