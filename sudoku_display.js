@@ -28,7 +28,7 @@ export const solutionBoard = [
 
 export const prefilledCells = initialBoard.map(row => row.map(val => val !== 0));
 
-export function displayBoard(board, containerID, prefilledCells){
+export function displayBoard(board, containerID, prefilledCells, highlightedCells=null){
     const container = document.getElementById(containerID)
     let html = '<table>';
     for (let row = 0; row < 9; row++) {
@@ -44,6 +44,11 @@ export function displayBoard(board, containerID, prefilledCells){
             // allow prefilled cells in initial board to be visualized better
             if(prefilledCells && prefilledCells[row][col]){
                 cellClass = 'prefilled'
+            }
+            
+            // highlighted cells for when verifier makes challenge
+            if (highlightedCells && highlightedCells[row][col]){
+                cellClass += 'highlighted';
             }
             
             // bolder lines for the overall 3x3

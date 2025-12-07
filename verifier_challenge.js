@@ -13,6 +13,8 @@ function updateRound(){
 document.addEventListener("boardCommitted", () => {
     const chooseButton = document.getElementById("chooseChallenge");
     if (chooseButton) chooseButton.disabled = false; // enable after commitment
+    // show default verifier selection for visual purposes 
+    updateHighlight();
 });
 
 document.getElementById("chooseChallenge").onclick = async() =>{
@@ -21,12 +23,54 @@ document.getElementById("chooseChallenge").onclick = async() =>{
     const index = parseInt(document.getElementById("challengeIndex").value);
 
     let openedBoard = await handleVerifierChallenge(type, index);
-    displayBoard(openedBoard, "verifierBoardDiv", prefilledCells);
+    displayBoard(openedBoard, "verifierBoardDiv", null, highlightBoard);
 
     // can't choose another challenge until a new round
     document.getElementById("chooseChallenge").disabled = true;
     document.getElementById("verifyChallenge").disabled = false; 
 }
+
+let highlightBoard = emptyBoard.map(row => row.map(_ => false));
+function highlightVerifierSelection(type, index){
+    // reset highlights for verifier board
+    highlightBoard = emptyBoard.map(row => row.map(_ => false));
+
+    if (type === "ROW") {
+        for (let col = 0; col < 9; col++) {
+            highlightBoard[index][col] = true;
+        }
+    } else if (type === "COL") {
+        for (let row = 0; row < 9; row++) {
+            highlightBoard[row][index] = true;
+        }
+    } else if (type === "SUBTABLE") {
+        const subtableRow = Math.floor(index / 3) * 3;
+        const subtableCol = (index % 3) * 3;
+        for (let r = subtableRow; r < subtableRow + 3; r++) {
+            for (let c = subtableCol; c < subtableCol + 3; c++) {
+                highlightBoard[r][c] = true;
+            }
+        }
+    } else if (type === "PERMUTATION") {
+        committedCells.forEach(c => {
+            if (prefilledCells[c.row][c.col]) {
+                highlightBoard[c.row][c.col] = true;
+            }
+        });
+    }
+
+    displayBoard(emptyBoard, "verifierBoardDiv", null, highlightBoard)
+}
+
+document.getElementById("challengeType").addEventListener("change", updateHighlight);
+document.getElementById("challengeIndex").addEventListener("change", updateHighlight);
+
+function updateHighlight(){
+    const type = document.getElementById("challengeType").value; 
+    const index = parseInt(document.getElementById("challengeIndex").value);
+    highlightVerifierSelection(type, index);
+}
+
 
 function getSelectedCells(type, index){
     let selected_cells = []
