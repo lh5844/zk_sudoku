@@ -28,16 +28,7 @@ document.getElementById("chooseChallenge").onclick = async() =>{
     document.getElementById("verifyChallenge").disabled = false; 
 }
 
-document.getElementById("verifyChallenge").onclick = () =>{
-    // need to actually verify the board 
-    round += 1; 
-    updateRound(); 
-
-    document.getElementById("verifyChallenge").disabled = true;
-    document.getElementById("nextRound").disabled = false;
-}
-
-async function handleVerifierChallenge(type, index){
+function getSelectedCells(type, index){
     let selected_cells = []
     if (type === "ROW"){
         selected_cells = getRow(index)
@@ -48,7 +39,12 @@ async function handleVerifierChallenge(type, index){
     }else if (type === "PERMUTATION"){
         selected_cells = getPermutation();
     }
-    
+    return selected_cells
+}
+
+async function handleVerifierChallenge(type, index){
+    let selected_cells = getSelectedCells(type, index);
+    // get the row, col index from selected committed cell obj
     const verifyCells = selected_cells.map(c => [c.row, c.col]); 
 
     let openedBoard = await openBoardCommitmentValues(
@@ -56,6 +52,30 @@ async function handleVerifierChallenge(type, index){
     )
 
     return openedBoard;
+}
+
+
+document.getElementById("verifyChallenge").onclick = () =>{
+    let open_verified = true; 
+    const table = document.getElementById("verifierBoardDiv").querySelector("table");
+    for (let row of table.rows) {
+        for (let cell of row.cells) {
+            const val = cell.textContent.trim();
+            if (val && val == "null"){
+                open_verified = false; // null cell 
+            }
+        }
+    }
+    if (!open_verified){
+        alert("Something went wrong: Verification failed! Resetting Protocol");
+        window.location.reload(); 
+    }
+
+    round += 1; 
+    updateRound(); 
+
+    document.getElementById("verifyChallenge").disabled = true;
+    document.getElementById("nextRound").disabled = false;
 }
 
 function getRow(r) {

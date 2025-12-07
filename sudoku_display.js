@@ -34,8 +34,8 @@ export function displayBoard(board, containerID, prefilledCells){
     for (let row = 0; row < 9; row++) {
         html += '<tr>';
         for (let col = 0; col < 9; col++) {
-            //let val = board[row][col];
-            let val = (board[row] && board[row][col] != null) ? board[row][col] : 0;
+            let val = board[row][col];
+            
             if (val == 0){ // zero values should be blank
                 val = '';
             }
