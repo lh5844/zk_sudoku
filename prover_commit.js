@@ -1,8 +1,7 @@
 import { solutionBoard, prefilledCells, displayBoard } from "./sudoku_display.js";
 
 let permutatedSolution = null;
-let committedCells = [];
-
+export let committedCells = [];
 // Fisher-Yates array shuffling algorithm for random permutation
 function shuffleArray(array){
     for (let i = array.length -1; i > 0; i--){
@@ -172,6 +171,7 @@ const commitButton = document.getElementById("commitButton");
 commitButton.onclick = async () => {
     committedCells = await commitBoard(permutatedSolution);
     displayCommitments(committedCells, "commitedBoardDiv");
+    document.dispatchEvent(new CustomEvent("boardCommitted"));
     commitButton.disabled = true;
     openButton.disabled = false; // can only open after committed
 };

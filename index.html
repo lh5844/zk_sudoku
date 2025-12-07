@@ -100,11 +100,32 @@
         <h3>What the Verifier Sees</h3>
         <h4>Initial</h4>
         <div id="verifierBoardDiv"></div>
+        <label>Challenge Type</label>
+        <select id="challengeType">
+            <option value="ROW">Reveal Row</option>
+            <option value="COL">Reveal Column</option>
+            <option value="SUBTABLE">Reveal Subtable</option>
+            <option value="PERMUTATION">Reveal Permutation</option>
+        </select>
+        <label>Corresponding Index (1-9)</label>
+        <select id="challengeIndex">
+            <option value="0">1</option>
+            <option value="1">2</option>
+            <option value="2">3</option>
+            <option value="3">4</option>
+            <option value="4">5</option>
+            <option value="5">6</option>
+            <option value="6">7</option>
+            <option value="7">8</option>
+            <option value="8">9</option>
+        </select>
+        <button class="buttons" button id="chooseChallenge" disabled>Choose Challenge</button>
     </div>
 
 </div>
 
 <script type="module" src="sudoku_display.js"></script>
 <script type="module" src="prover_commit.js"></script>
+<script type="module" src="verifier_challenge.js"></script>
 </body>
 </html>

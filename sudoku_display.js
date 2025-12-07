@@ -42,7 +42,7 @@ export function displayBoard(board, containerID, prefilledCells){
 
             let cellClass = '';
             // allow prefilled cells in initial board to be visualized better
-            if(prefilledCells && prefilledCells[i][j]){
+            if(prefilledCells && prefilledCells[row][col]){
                 cellClass = 'prefilled'
             }
             
